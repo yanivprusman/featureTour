@@ -260,7 +260,13 @@ export default function Viewer({ screenshot }: { screenshot: Screenshot }) {
                   key={h.id}
                   data-id={`hotspot-${h.id}`}
                   onMouseEnter={() => !editMode && setHovered(h.id)}
-                  onMouseLeave={() => !editMode && setHovered(null)}
+                  onMouseLeave={(e) => {
+                    if (editMode) return;
+                    const related = e.relatedTarget as Node | null;
+                    const tooltip = (e.currentTarget as HTMLElement).querySelector("[data-tooltip]");
+                    if (tooltip && related && tooltip.contains(related)) return;
+                    setHovered(null);
+                  }}
                   onClick={(e) => {
                     if (editMode) {
                       e.stopPropagation();
@@ -308,6 +314,8 @@ export default function Viewer({ screenshot }: { screenshot: Screenshot }) {
                   {/* Tooltip on hover (view mode) */}
                   {isHover && !editMode && (
                     <div
+                      data-tooltip
+                      onMouseLeave={() => setHovered(null)}
                       style={{
                         position: "absolute",
                         zIndex: 40,
@@ -318,7 +326,8 @@ export default function Viewer({ screenshot }: { screenshot: Screenshot }) {
                         background: "var(--panel-2)",
                         border: "1px solid var(--border)",
                         boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-                        pointerEvents: "none",
+                        userSelect: "text",
+                        cursor: "text",
                         ...tooltipPlacement(h),
                       }}
                     >
